@@ -4,6 +4,5 @@ steps:
   - name: 'gcr.io/cloud-builders/gsutil'
     args: ['-m', 'cp', '-r', 'app', 'gs://bunqflow']
 
-options:
-  substitutions:
-    _LOGS_BUCKET: gs://bunqflow
+build:
+  logs_bucket: gs://bunqflow
