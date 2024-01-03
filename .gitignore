@@ -1,0 +1,12 @@
+.idea/*
+.venv/*
+.vscode/*
+**/__pycache__/*
+
+.env
+.env.development
+.env.production
+bunq-sandbox.conf
+bunq.conf
+firebase-config.json
+firebase-config-development.json
