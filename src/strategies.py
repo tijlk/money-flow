@@ -19,23 +19,25 @@ def top_up_strategy(
     allocation: Allocation, remainder: Decimal, *, bunq: BunqLib
 ) -> Decimal:
     balance = bunq.get_balance_by_iban(iban=allocation.iban)
-    amount = allocation.value - balance
+    amount = allocation.target_balance - balance
     amount = _check_remainder(amount, remainder=remainder)
+    if allocation.max_amount:
+        amount = min(amount, allocation.max_amount)
 
-    return _check_minimum_amount(amount, minimum_amount=allocation.minimum_amount)
+    return _check_minimum_amount(amount, minimum_amount=allocation.min_amount)
 
 
 def fixed_strategy(allocation: Allocation, remainder: Decimal, *_, **__) -> Decimal:
-    amount = allocation.value
+    amount = allocation.fixed_amount
     amount = _check_remainder(amount, remainder=remainder)
-    return _check_minimum_amount(amount, minimum_amount=allocation.minimum_amount)
+    return _check_minimum_amount(amount, minimum_amount=allocation.min_amount)
 
 
 def percentage_strategy(
     allocation: Allocation, remainder: Decimal, *_, **__
 ) -> Decimal:
-    amount = round(remainder * (allocation.value / 100), 2)
-    return _check_minimum_amount(amount, minimum_amount=allocation.minimum_amount)
+    amount = Decimal(round(float(remainder) * (allocation.percentage / 100.), 2))
+    return _check_minimum_amount(amount, minimum_amount=allocation.min_amount)
 
 
 all_strategies = dict(

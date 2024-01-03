@@ -1,49 +1,46 @@
 import os
 from itertools import groupby
-
 from dotenv import load_dotenv
+import warnings
 
 from src.allocation import FireStore
 from src.bunq import BunqLib
 from src.strategies import all_strategies
+warnings.filterwarnings('ignore')
 
 load_dotenv()
-
 GOOGLE_FIRESTORE_CONFIG = os.getenv("GOOGLE_FIRESTORE_CONFIG")
-
 API_CONTEXT_FILE_PATH = os.getenv("BUNQ_FILE_NAME")
 API_KEY = os.getenv("BUNQ_API_KEY")
-
 ENVIRONMENT = os.getenv("ENVIRONMENT")
 DEVICE_DESCRIPTION = os.getenv("DESCRIPTION")
+SIMULATE = os.getenv("SIMULATE", 'False').lower() in ('true', '1', 't')
 
 
 class AutomateAllocations:
     def __init__(self, bunq: BunqLib, store: FireStore):
         self.bunq = bunq
         self.store = store
+        self.main_account_balance = None
 
     def run(self):
-        allocations = self.store.get_allocations()
-        grouped_allocations = groupby(allocations, key=lambda x: x.order)
-
+        allocations = self.store.get_allocations(self.bunq.accounts)
+        sorted_allocations = sorted(allocations, key=lambda x: x.priority)
+        grouped_allocations = groupby(sorted_allocations, key=lambda x: x.priority)
         main_account_settings = self.store.get_main_account_settings()
-        cutoff = main_account_settings.minimum
-        main_account_balance = self.bunq.get_balance_by_id(id_=main_account_settings.id)
-        if main_account_balance < cutoff:
-            return
-
-        remainder = main_account_balance - cutoff
+        self.main_account_balance = self.bunq.get_balance_by_id(id_=main_account_settings.id)
+        remainder = self.main_account_balance
+        print(f"{remainder} EUR to sort...")
 
         for _, group in grouped_allocations:
             allocations = list(group)
-            for allocation in filter(lambda a: a.type != "percentage", allocations):
+            for allocation in filter(lambda a: a.strategy != "percentage", allocations):
                 remainder = self._process_allocation(
                     allocation, main_account_settings, remainder
                 )
 
             original_remainder = remainder
-            for allocation in filter(lambda a: a.type == "percentage", allocations):
+            for allocation in filter(lambda a: a.strategy == "percentage", allocations):
                 remainder = self._process_allocation(
                     allocation,
                     main_account_settings,
@@ -54,7 +51,7 @@ class AutomateAllocations:
     def _process_allocation(
         self, allocation, main_account_settings, remainder, *, original_remainder=None
     ):
-        strategy = all_strategies.get(allocation.type)
+        strategy = all_strategies.get(allocation.strategy)
         amount = strategy(
             allocation,
             original_remainder if original_remainder else remainder,
@@ -62,11 +59,14 @@ class AutomateAllocations:
         )
         if amount > 0:
             self.bunq.make_payment(
+                from_account_id=main_account_settings.id,
+                to_account_alias=allocation.description,
+                to_account_type=allocation.account_type,
                 amount=amount,
-                description=allocation.description,
-                iban=allocation.iban,
-                iban_name=allocation.iban_name,
-                account_id=main_account_settings.id,
+                description=f"Deel salaris voor {allocation.description}",
+                to_iban=allocation.iban,
+                simulate=SIMULATE,
+                original_amount_to_sort=self.main_account_balance
             )
             remainder -= amount
         return remainder
@@ -81,5 +81,5 @@ if __name__ == "__main__":
         api_context_file_path=API_CONTEXT_FILE_PATH,
     )
     bunq_.connect()
-
+    bunq_.get_accounts()
     AutomateAllocations(bunq=bunq_, store=store_).run()

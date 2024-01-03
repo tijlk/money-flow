@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = ">=3.0.0"
+bunq-sdk = {git = "git+https://github.com/bunq/sdk_python"}
+requests = ">=2.31.0"
+firebase-admin = ">=6.3.0"
+python-dotenv = ">=1.0.0"
+
+[dev-packages]
+black = ">=23.12.1"
+pytest = ">=7.4.4"
+ipykernel = ">=6.28.0"
+
+[requires]
+python_version = "3.9"
