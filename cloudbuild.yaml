@@ -5,4 +5,5 @@ steps:
     args: ['-m', 'cp', '-r', 'app', 'gs://bunqflow']
 
 options:
-  logs_bucket: gs://bunqflow
+  substitutions:
+    _LOGS_BUCKET: gs://bunqflow
