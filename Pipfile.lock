@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "7bf53eb2c4428f82b93e5472f91809541fdd0efab30be7e991810c7ee1b3e18a"
+            "sha256": "17ca05ad7d6340044e9eb732870af0cb6cf3fff1170c6e3fac3b23de6c3a7a84"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -35,7 +35,7 @@
         "bunq-sdk": {
             "git": "git+https://github.com/bunq/sdk_python",
             "markers": "python_full_version >= '3.7.0'",
-            "ref": "dd52899e6bd514dd3552dd1534bd4c46e74bdd09"
+            "ref": "1bb99df4c6b0ac1e0519cc7d33a292c86e706ad6"
         },
         "cachecontrol": {
             "hashes": [
@@ -326,6 +326,15 @@
             "markers": "platform_python_implementation != 'PyPy'",
             "version": "==2.14.0"
         },
+        "google-cloud-secret-manager": {
+            "hashes": [
+                "sha256:2bf58be569710773f0757d7a788e2860767aa1c148a5255e53b228da3fbcf446",
+                "sha256:8254e2960c06a8dc91aeac3c894afba0893a674582f0e0ecfc22f894e6173c2f"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.7'",
+            "version": "==2.17.0"
+        },
         "google-cloud-storage": {
             "hashes": [
                 "sha256:2d23fcf59b55e7b45336729c148bb1c464468c69d5efbaee30f7201dd90eb97e",
@@ -417,12 +426,23 @@
             "version": "==2.7.0"
         },
         "googleapis-common-protos": {
+            "extras": [
+                "grpc"
+            ],
             "hashes": [
                 "sha256:4750113612205514f9f6aa4cb00d523a94f3e8c06c5ad2fee466387dc4875f07",
                 "sha256:83f0ece9f94e5672cced82f592d2a5edf527a96ed1794f0bab36d5735c996277"
             ],
             "markers": "python_version >= '3.7'",
             "version": "==1.62.0"
+        },
+        "grpc-google-iam-v1": {
+            "hashes": [
+                "sha256:53902e2af7de8df8c1bd91373d9be55b0743ec267a7428ea638db3775becae89",
+                "sha256:fad318608b9e093258fbf12529180f400d1c44453698a33509cc6ecf005b294e"
+            ],
+            "markers": "python_version >= '3.7'",
+            "version": "==0.13.0"
         },
         "grpcio": {
             "hashes": [
@@ -1086,11 +1106,11 @@
         },
         "jupyter-core": {
             "hashes": [
-                "sha256:3d16aec2e1ec84b69f7794e49c32830c1d950ad149526aec954c100047c5f3a7",
-                "sha256:5139be639404f7f80f3db6f687f47b8a8ec97286b4fa063c984024720e7224dc"
+                "sha256:16eea462f7dad23ba9f86542bdf17f830804e2028eb48d609b6134d91681e983",
+                "sha256:cb8d3ed92144d2463a3c5664fdd686a3f0c1442ea45df8babb1c1a9e6333fe03"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==5.6.1"
+            "version": "==5.7.0"
         },
         "matplotlib-inline": {
             "hashes": [

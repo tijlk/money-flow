@@ -2,16 +2,29 @@ import os
 from itertools import groupby
 from dotenv import load_dotenv
 import warnings
+import json
+from google.cloud import secretmanager
 
 from src.allocation import FireStore
 from src.bunq import BunqLib
 from src.strategies import all_strategies
 warnings.filterwarnings('ignore')
 
+
 load_dotenv()
-GOOGLE_FIRESTORE_CONFIG = os.getenv("GOOGLE_FIRESTORE_CONFIG")
+
+
+def get_secret_value(secret_name, project_id):
+    client = secretmanager.SecretManagerServiceClient()
+    secret_version_name = client.secret_version_path(project_id, secret_name, 'latest')
+    response = client.access_secret_version(name=secret_version_name)
+    return response.payload.data.decode('UTF-8')
+
+
+PROJECT_ID = os.getenv("PROJECT_ID")
+API_KEY = get_secret_value('bunq_api_key', PROJECT_ID)
+GOOGLE_FIRESTORE_CONFIG = json.loads(get_secret_value('firebase_service_account', PROJECT_ID))
 API_CONTEXT_FILE_PATH = os.getenv("BUNQ_FILE_NAME")
-API_KEY = os.getenv("BUNQ_API_KEY")
 ENVIRONMENT = os.getenv("ENVIRONMENT")
 DEVICE_DESCRIPTION = os.getenv("DESCRIPTION")
 SIMULATE = os.getenv("SIMULATE", 'False').lower() in ('true', '1', 't')

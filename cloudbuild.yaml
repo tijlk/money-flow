@@ -1,0 +1,5 @@
+steps:
+  - name: 'gcr.io/cloud-builders/git'
+    args: ['clone', 'https://github.com/tijlk/money-flow.git', 'app']
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args: ['-m', 'cp', '-r', 'app', 'gs://bunqflow']
