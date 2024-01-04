@@ -39,7 +39,7 @@ class AutomateAllocations:
         return "Success"
 
     def _process_allocation(
-            self, allocation, main_account_settings, remainder, *, original_remainder=None
+        self, allocation, main_account_settings, remainder, *, original_remainder=None
     ):
         strategy = all_strategies.get(allocation.strategy)
         amount = strategy(
