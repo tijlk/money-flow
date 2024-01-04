@@ -30,8 +30,11 @@ class Settings:
 
 class FireStore:
     def __init__(self, config: str):
-        cred = credentials.Certificate(config)
-        firebase_admin.initialize_app(cred)
+        try:
+            firebase_admin.get_app()
+        except ValueError:
+            cred = credentials.Certificate(config)
+            firebase_admin.initialize_app(cred)
         self.db = firestore.client()
 
     def get_main_account_settings(self):
@@ -67,3 +70,5 @@ class FireStore:
             )
 
         return list(map(transform_data, data))
+
+

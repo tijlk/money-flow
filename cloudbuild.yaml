@@ -3,8 +3,6 @@ steps:
     args: ['clone', 'https://github.com/tijlk/money-flow.git', 'app']
   - name: 'gcr.io/cloud-builders/zip'
     args: ['-r', 'app.zip', 'app']
-  - name: 'gcr.io/cloud-builders/gsutil'
-    args: ['-m', 'cp', 'app.zip', 'gs://bunqflow']
 
 options:
   logging: CLOUD_LOGGING_ONLY
