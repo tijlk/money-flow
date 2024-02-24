@@ -7,6 +7,7 @@ from bunq.sdk.context.api_environment_type import ApiEnvironmentType
 from bunq.sdk.context.bunq_context import BunqContext
 from bunq.sdk.model.generated.endpoint import MonetaryAccount, Payment
 from bunq.sdk.model.generated.object_ import Amount, Pointer
+from bunq.sdk.http.pagination import Pagination
 
 
 class BunqLib:
@@ -107,16 +108,36 @@ class BunqLib:
             if account_info["iban"] == iban:
                 return Decimal(account_info["balance"])
 
+    @staticmethod
+    def get_some_accounts(pagination, first_time=False):
+        if first_time:
+            params = pagination.url_params_count_only
+        else:
+            params = pagination.url_params_previous_page
+        response = MonetaryAccount.list(params=params)
+        return response.value, response.pagination
+
     def get_accounts(self):
-        accounts = {}
-        for account in MonetaryAccount.list().value:
+        pagination = Pagination()
+        pagination.count = 200
+        all_accounts = []
+        i = 0
+        accounts, pagination = self.get_some_accounts(pagination, first_time=True)
+        time.sleep(1.1)
+        all_accounts.extend(accounts)
+        while pagination.has_previous_page():
+            accounts, pagination = self.get_some_accounts(pagination)
+            time.sleep(1.1)
+            all_accounts.extend(accounts)
+            i += 1
+        accounts_dict = {}
+        for account in all_accounts:
             object_type, account = next((key, value) for key, value in vars(account).items() if value is not None)
             if account.status == 'ACTIVE':
-                accounts[account.id_] = {
+                accounts_dict[account.id_] = {
                     "description": account.description,
                     "balance": float(account.balance.value),
                     "iban": account.alias[0].value,
                     "type": object_type[16:].lower()
                 }
-        self.accounts = accounts
-
+        return accounts_dict
