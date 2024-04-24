@@ -23,13 +23,13 @@ class AutomateAllocations:
 
         for _, group in grouped_allocations:
             allocations = list(group)
-            for allocation in filter(lambda a: a.strategy != "percentage", allocations):
-                remainder = self._process_allocation(
-                    allocation, main_account_settings, remainder
-                )
+            # for allocation in filter(lambda a: a.strategy != "percentage", allocations):
+            #     remainder = self._process_allocation(
+            #         allocation, main_account_settings, remainder
+            #     )
 
             original_remainder = remainder
-            for allocation in filter(lambda a: a.strategy == "percentage", allocations):
+            for allocation in allocations:  # filter(lambda a: a.strategy == "percentage", allocations):
                 remainder = self._process_allocation(
                     allocation,
                     main_account_settings,
@@ -59,4 +59,8 @@ class AutomateAllocations:
                 original_amount_to_sort=self.main_account_balance
             )
             remainder -= amount
+            # Update account balance
+            for key, account_info in self.bunq.accounts.items():
+                if account_info["iban"] == allocation.iban:
+                    self.bunq.accounts[key]["balance"] += float(amount)
         return remainder

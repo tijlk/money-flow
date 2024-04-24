@@ -18,7 +18,7 @@ def get_secret_value(secret_name, project_id):
 
 
 warnings.filterwarnings('ignore')
-load_dotenv()
+load_dotenv(override=True)
 
 
 PROJECT_ID = os.getenv("PROJECT_ID")
@@ -31,8 +31,13 @@ SIMULATE = os.getenv("SIMULATE", 'False').lower() in ('true', '1', 't')
 
 
 @functions_framework.http
-def main(request):
-    store_ = FireStore(config=GOOGLE_FIRESTORE_CONFIG)
+def main():
+    try:
+        store_ = FireStore(config=GOOGLE_FIRESTORE_CONFIG)
+    except Exception as error:
+        print("An error occurred:", type(error).__name__, "–", error)
+        print("Are you on VPN maybe?")
+        exit(1)
     bunq_ = BunqLib(
         api_key=API_KEY,
         environment_type=ENVIRONMENT,
@@ -46,4 +51,4 @@ def main(request):
 
 
 if __name__ == "__main__":
-    main(None)
+    main()

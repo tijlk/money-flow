@@ -130,14 +130,13 @@ class BunqLib:
             time.sleep(1.1)
             all_accounts.extend(accounts)
             i += 1
-        accounts_dict = {}
+        self.accounts = {}
         for account in all_accounts:
             object_type, account = next((key, value) for key, value in vars(account).items() if value is not None)
             if account.status == 'ACTIVE':
-                accounts_dict[account.id_] = {
+                self.accounts[account.id_] = {
                     "description": account.description,
                     "balance": float(account.balance.value),
                     "iban": account.alias[0].value,
                     "type": object_type[16:].lower()
                 }
-        return accounts_dict
