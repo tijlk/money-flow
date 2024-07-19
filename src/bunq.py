@@ -133,7 +133,11 @@ class BunqLib:
         self.accounts = {}
         for account in all_accounts:
             object_type, account = next((key, value) for key, value in vars(account).items() if value is not None)
-            if account.status == 'ACTIVE':
+            if account.status == 'ACTIVE' and object_type != "_MonetaryAccountExternal":
+                # print(account.alias)
+                # print(account.description)
+                # print(account.balance.value)
+                # print(object_type)
                 self.accounts[account.id_] = {
                     "description": account.description,
                     "balance": float(account.balance.value),
