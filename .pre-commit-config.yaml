@@ -1,0 +1,28 @@
+repos:
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.6.1  # Use the latest stable version
+    hooks:
+      - id: nbstripout
+        name: nbstripout (remove notebook outputs)
+        entry: nbstripout
+        language: system
+        types: [jupyter]
+        files: \.ipynb$
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.4.4  # Use the latest stable version
+    hooks:
+      - id: ruff
+        name: ruff (linter)
+        entry: ruff check
+        language: python
+        types: [python]
+        args: [--line-length=120]
+        exclude: 'notebooks/'
+      - id: ruff-format
+        name: ruff (formatter)
+        entry: ruff format
+        language: python
+        types: [python]
+        args: [--line-length=120]
+        exclude: 'notebooks/'

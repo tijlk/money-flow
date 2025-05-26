@@ -1,0 +1,24 @@
+[project]
+name = "money-flow"
+version = "0.1.0"
+description = "Money flow project"
+authors = [{ name = "Tijl Kindt" }]
+requires-python = ">=3.11"
+dependencies = [
+    "flask>=3.0.0",
+    "requests>=2.31.0",
+    "firebase-admin>=6.3.0",
+    "python-dotenv>=1.0.0",
+    "google-cloud-secret-manager",
+    "functions-framework>=3.0.0,<4.0.0",
+    "bunq-sdk @ git+https://github.com/bunq/sdk_python.git@develop"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.4",
+    "ipykernel>=6.28.0",
+    "pre-commit",
+    "nbstripout",
+    "ruff"
+]

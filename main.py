@@ -12,22 +12,22 @@ from src.bunq import BunqLib
 
 def get_secret_value(secret_name, project_id):
     client = secretmanager.SecretManagerServiceClient()
-    secret_version_name = client.secret_version_path(project_id, secret_name, 'latest')
+    secret_version_name = client.secret_version_path(project_id, secret_name, "latest")
     response = client.access_secret_version(name=secret_version_name)
-    return response.payload.data.decode('UTF-8')
+    return response.payload.data.decode("UTF-8")
 
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 load_dotenv(override=True)
 
 
 PROJECT_ID = os.getenv("PROJECT_ID")
-API_KEY = get_secret_value('bunq_api_key', PROJECT_ID)
-GOOGLE_FIRESTORE_CONFIG = json.loads(get_secret_value('firebase_service_account', PROJECT_ID))
+API_KEY = get_secret_value("bunq_api_key", PROJECT_ID)
+GOOGLE_FIRESTORE_CONFIG = json.loads(get_secret_value("firebase_service_account", PROJECT_ID))
 API_CONTEXT_FILE_PATH = os.getenv("BUNQ_FILE_NAME")
 ENVIRONMENT = os.getenv("ENVIRONMENT")
 DEVICE_DESCRIPTION = os.getenv("DESCRIPTION")
-SIMULATE = os.getenv("SIMULATE", 'False').lower() in ('true', '1', 't')
+SIMULATE = os.getenv("SIMULATE", "False").lower() in ("true", "1", "t")
 
 
 @functions_framework.http
