@@ -22,3 +22,9 @@ dev = [
     "nbstripout",
     "ruff"
 ]
+
+[project.scripts]
+money-flow = "money_flow.main:main"
+
+[project.entry-points.console_scripts]
+money-flow = "money_flow.main:main"

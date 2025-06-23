@@ -1,8 +1,8 @@
 from itertools import groupby
 
-from src.bunq import BunqLib
-from src.strategies import all_strategies
-from src.allocation import FireStore
+from money_flow.allocation import FireStore
+from money_flow.bunq import BunqLib
+from money_flow.strategies import all_strategies
 
 
 class AutomateAllocations:
@@ -19,7 +19,7 @@ class AutomateAllocations:
         main_account_settings = self.store.get_main_account_settings()
         self.main_account_balance = self.bunq.get_balance_by_id(id_=main_account_settings.id)
         remainder = self.main_account_balance
-        print(f"{remainder} EUR to sort...")
+        print(f"{remainder:,.2f} EUR to sort...")
 
         for _, group in grouped_allocations:
             allocations = list(group)
@@ -27,7 +27,6 @@ class AutomateAllocations:
             #     remainder = self._process_allocation(
             #         allocation, main_account_settings, remainder
             #     )
-
             original_remainder = remainder
             for allocation in allocations:  # filter(lambda a: a.strategy == "percentage", allocations):
                 remainder = self._process_allocation(
@@ -38,9 +37,7 @@ class AutomateAllocations:
                 )
         return "Success"
 
-    def _process_allocation(
-        self, allocation, main_account_settings, remainder, *, original_remainder=None
-    ):
+    def _process_allocation(self, allocation, main_account_settings, remainder, *, original_remainder=None):
         strategy = all_strategies.get(allocation.strategy)
         amount = strategy(
             allocation,
@@ -56,7 +53,7 @@ class AutomateAllocations:
                 description=f"Deel salaris voor {allocation.description}",
                 to_iban=allocation.iban,
                 simulate=self.simulate,
-                original_amount_to_sort=self.main_account_balance
+                original_amount_to_sort=self.main_account_balance,
             )
             remainder -= amount
             # Update account balance

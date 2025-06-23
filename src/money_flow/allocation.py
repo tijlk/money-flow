@@ -3,8 +3,7 @@ from decimal import Decimal
 from typing import Optional
 
 import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
+from firebase_admin import credentials, firestore
 
 
 @dataclass
@@ -66,9 +65,7 @@ class FireStore:
                 min_amount=min_amount,
                 target_balance=target_balance,
                 current_balance=current_balance,
-                fixed_amount=fixed_amount
+                fixed_amount=fixed_amount,
             )
 
         return list(map(transform_data, data))
-
-

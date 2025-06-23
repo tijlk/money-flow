@@ -7,12 +7,42 @@ from bunq.sdk.context.api_environment_type import ApiEnvironmentType
 from bunq.sdk.context.bunq_context import BunqContext
 from bunq.sdk.http.pagination import Pagination
 from bunq.sdk.model.generated.endpoint import (
-    MonetaryAccountApiObject,
     MonetaryAccountBankApiObject,
-    PaymentApiObject,
     MonetaryAccountJointApiObject,
+    MonetaryAccountSavingsApiObject,
+    PaymentApiObject,
 )
 from bunq.sdk.model.generated.object_ import AmountObject, PointerObject
+
+
+def fixed_from_json_list(cls, response_raw, wrapper=None):
+    from bunq import Pagination
+    from bunq.sdk.json import converter
+
+    json = response_raw.body_bytes.decode()
+    obj = converter.json_to_class(dict, json)
+    array = obj[cls._FIELD_RESPONSE]
+    array_deserialized = []
+    for item in array:
+        item_unwrapped = item if wrapper is None else item.get(wrapper, item)
+        try:
+            item_deserialized = converter.deserialize(cls, item_unwrapped)
+        except TypeError:
+            print(
+                f"failed to deserialize item of type {cls.__name__}: description {item_unwrapped['description']}, "
+                f"IBAN: {item_unwrapped['alias'][0]['value']}, {float(item_unwrapped['balance']['value']):,.2f} EUR"
+            )
+        else:
+            array_deserialized.append(item_deserialized)
+    pagination = None
+    if cls._FIELD_PAGINATION in obj:
+        pagination = converter.deserialize(Pagination, obj[cls._FIELD_PAGINATION])
+    from bunq.sdk.http.bunq_response import BunqResponse
+
+    return BunqResponse(array_deserialized, response_raw.headers, pagination)
+
+
+MonetaryAccountSavingsApiObject._from_json_list = classmethod(fixed_from_json_list)
 
 
 class BunqLib:
@@ -95,8 +125,8 @@ class BunqLib:
         if not self.is_connected:
             raise Exception("Not connected. Please call connect first")
 
-        main_account: MonetaryAccountApiObject = MonetaryAccountApiObject.get(id_).value
-        return Decimal(main_account.get_referenced_object().balance.value)
+        balance = round(self.accounts[id_]["balance"], 2)
+        return Decimal(balance)
 
     def get_balance_by_iban(self, *, iban: str):
         if not self.is_connected:
@@ -111,46 +141,44 @@ class BunqLib:
                 return Decimal(account_info["balance"])
 
     @staticmethod
-    def get_some_accounts(pagination, first_time=False, joint=False):
+    def get_some_accounts(pagination, first_time=False, account_type: str = "bank"):
         if first_time:
             params = pagination.url_params_count_only
         else:
             params = pagination.url_params_previous_page
-        if joint:
+        if account_type == "savings":
+            response = MonetaryAccountSavingsApiObject.list(params=params)
+        elif account_type == "joint":
             response = MonetaryAccountJointApiObject.list(params=params)
         else:
             response = MonetaryAccountBankApiObject.list(params=params)
         return response.value, response.pagination
 
-    def add_raw_accounts_of_one_type(self, all_accounts, joint=False):
+    def add_raw_accounts_of_one_type(self, all_accounts, account_type: str = "bank"):
         pagination = Pagination()
         pagination.count = 200
-        accounts, pagination = self.get_some_accounts(pagination, first_time=True, joint=joint)
+        accounts, pagination = self.get_some_accounts(pagination, first_time=True, account_type=account_type)
         time.sleep(1.1)
         all_accounts.extend(accounts)
         while pagination.has_previous_page():
-            accounts, pagination = self.get_some_accounts(pagination, joint=joint)
+            accounts, pagination = self.get_some_accounts(pagination, account_type=account_type)
             time.sleep(1.1)
             all_accounts.extend(accounts)
         return all_accounts
 
     def get_accounts(self):
         all_accounts = []
-        all_accounts = self.add_raw_accounts_of_one_type(all_accounts, joint=False)
-        all_accounts = self.add_raw_accounts_of_one_type(all_accounts, joint=True)
+        all_accounts = self.add_raw_accounts_of_one_type(all_accounts, account_type="bank")
+        all_accounts = self.add_raw_accounts_of_one_type(all_accounts, account_type="joint")
+        all_accounts = self.add_raw_accounts_of_one_type(all_accounts, account_type="savings")
 
         self.accounts = {}
         for account in all_accounts:
-            object_type, account = next((key, value) for key, value in vars(account).items() if value is not None)
-            # TODO: does the object_type need to be renamed as well?
+            object_type = type(account).__name__
             if account.status == "ACTIVE" and object_type != "_MonetaryAccountExternal":
-                # print(account.alias)
-                # print(account.description)
-                # print(account.balance.value)
-                # print(object_type)
                 self.accounts[account.id_] = {
                     "description": account.description,
                     "balance": float(account.balance.value),
                     "iban": account.alias[0].value,
-                    "type": object_type[16:].lower(),
+                    "type": object_type[15:-9].lower(),
                 }

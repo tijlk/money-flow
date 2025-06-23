@@ -10,4 +10,4 @@ Activate virtual environment
 
 Move money:
 
-`python main.py`
+`money-flow` or `python -m money_flow`

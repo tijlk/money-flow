@@ -1,7 +1,7 @@
 from decimal import Decimal
 
-from src.allocation import Allocation
-from src.bunq import BunqLib
+from money_flow.allocation import Allocation
+from money_flow.bunq import BunqLib
 
 
 def _check_minimum_amount(amount: Decimal, *, minimum_amount: Decimal) -> Decimal:
@@ -15,9 +15,7 @@ def _check_remainder(amount: Decimal, *, remainder: Decimal) -> Decimal:
     return min(amount, remainder)
 
 
-def top_up_strategy(
-    allocation: Allocation, remainder: Decimal, *, bunq: BunqLib
-) -> Decimal:
+def top_up_strategy(allocation: Allocation, remainder: Decimal, *, bunq: BunqLib) -> Decimal:
     balance = bunq.get_balance_by_iban(iban=allocation.iban)
     amount = allocation.target_balance - balance
     amount = _check_remainder(amount, remainder=remainder)
@@ -33,10 +31,8 @@ def fixed_strategy(allocation: Allocation, remainder: Decimal, *_, **__) -> Deci
     return _check_minimum_amount(amount, minimum_amount=allocation.min_amount)
 
 
-def percentage_strategy(
-    allocation: Allocation, remainder: Decimal, *_, **__
-) -> Decimal:
-    amount = Decimal(round(float(remainder) * (allocation.percentage / 100.), 2))
+def percentage_strategy(allocation: Allocation, remainder: Decimal, *_, **__) -> Decimal:
+    amount = Decimal(round(float(remainder) * (allocation.percentage / 100.0), 2))
     return _check_minimum_amount(amount, minimum_amount=allocation.min_amount)
 
 

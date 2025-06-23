@@ -12,3 +12,4 @@ firebase-config-development.json
 
 **/.ipynb_checkpoints/
 *.egg-info
+*.ipynb
