@@ -13,14 +13,27 @@ from money_flow.bunq import BunqLib
 
 
 def get_secret_value(secret_name, project_id):
-    client = secretmanager.SecretManagerServiceClient()
-    secret_version_name = client.secret_version_path(project_id, secret_name, "latest")
-    response = client.access_secret_version(name=secret_version_name)
-    return response.payload.data.decode("UTF-8")
+    # Diagnostic info to help debug local authentication issues
+    try:
+        import google.auth
+
+        creds, adc_project = google.auth.default()
+        # print("ADC credentials type:", type(creds).__name__, "adc_project:", adc_project)
+    except Exception as _err:
+        print("ADC load error:", type(_err).__name__, _err)
+    try:
+        client = secretmanager.SecretManagerServiceClient()
+        secret_version_name = client.secret_version_path(project_id, secret_name, "latest")
+        response = client.access_secret_version(name=secret_version_name)
+        return response.payload.data.decode("UTF-8")
+    except Exception as err:
+        print("Failed to access secret:", type(err).__name__, err)
+        raise
 
 
 warnings.filterwarnings("ignore")
 load_dotenv(override=True)
+
 
 PROJECT_ID = os.getenv("PROJECT_ID")
 API_KEY = get_secret_value("bunq_api_key", PROJECT_ID)

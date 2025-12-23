@@ -16,8 +16,12 @@ venv:
 	@echo "[Info] Installing dependencies with uv..."
 	uv sync --all-extras
 	@echo "[Info] Installing Look Ahead package in editable mode..."
-	. .venv/bin/activate && uv pip install -e .
-	pre-commit install
+	. .venv/bin/activate && uv pip install -e . && pre-commit install
+
+shell:
+	@echo "[Info] Starting shell with venv activated"
+	@if [ ! -d .venv ]; then $(MAKE) venv; fi
+	. .venv/bin/activate && exec $(SHELL)
 
 install-dev:
 	uv pip install -e .[dev]

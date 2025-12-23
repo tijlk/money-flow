@@ -11,7 +11,8 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "google-cloud-secret-manager",
     "functions-framework>=3.0.0,<4.0.0",
-    "bunq-sdk @ git+https://github.com/bunq/sdk_python.git@develop"
+    "bunq-sdk @ git+https://github.com/bunq/sdk_python.git@develop",
+    "pre-commit>=4.5.1",
 ]
 
 [project.optional-dependencies]
